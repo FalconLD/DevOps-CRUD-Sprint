@@ -89,3 +89,45 @@ def list_visitantes() -> list[dict]:
                 return [dict(row) for row in cur.fetchall()]
     finally:
         _get_pool().putconn(conn)
+
+
+def update_visitante(
+    visitante_id: int, nombre: str, correo: str, categoria_entrada: str
+) -> dict | None:
+    conn = _get_pool().getconn()
+    try:
+        with conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(
+                    """
+                    UPDATE visitantes
+                    SET nombre = %s,
+                        correo = %s,
+                        categoria_entrada = %s
+                    WHERE id = %s
+                    RETURNING id, nombre, correo, categoria_entrada, creado_en
+                    """,
+                    (nombre, correo, categoria_entrada, visitante_id),
+                )
+                row = cur.fetchone()
+                return dict(row) if row else None
+    finally:
+        _get_pool().putconn(conn)
+
+
+def delete_visitante(visitante_id: int) -> bool:
+    conn = _get_pool().getconn()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    DELETE FROM visitantes
+                    WHERE id = %s
+                    RETURNING id
+                    """,
+                    (visitante_id,),
+                )
+                return cur.fetchone() is not None
+    finally:
+        _get_pool().putconn(conn)

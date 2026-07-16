@@ -11,6 +11,10 @@ class VisitanteCreate(BaseModel):
     categoria_entrada: str = Field(min_length=1, max_length=50)
 
 
+class VisitanteUpdate(VisitanteCreate):
+    """Body de actualización; mismos campos que el alta."""
+
+
 class VisitanteOut(BaseModel):
     id: int
     nombre: str
