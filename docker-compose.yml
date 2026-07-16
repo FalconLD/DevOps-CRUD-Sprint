@@ -92,12 +92,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-visitantes}
       POSTGRES_USER: ${POSTGRES_USER:-cci_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cambiar_esta_clave_segura}
-    # ports:  # NUNCA publicar 5432 al host / Internet
-    expose:
-      - "5432"
+    # Sin "ports": PostgreSQL solo es alcanzable por servicios de app_net.
+    # En AWS, el Security Group también debe mantener 5432 cerrado.
     volumes:
-      # DBA: ajustar path EBS en AWS (ej. /data/postgres) y montar schema.sql
-      - postgres_data:/var/lib/postgresql/data
+      # Bind mount físico. En EC2, POSTGRES_DATA_PATH apunta al EBS montado.
+      - type: bind
+        source: ${POSTGRES_DATA_PATH:-./postgres_data}
+        target: /var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     networks:
       - app_net
@@ -107,10 +108,4 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
-# ---------------------------------------------------------------------------
-# OWNER: DBA / SRE — volúmenes de persistencia
-# En AWS, preferir bind mount a disco EBS si el enunciado lo exige.
-# ---------------------------------------------------------------------------
-volumes:
-  postgres_data:
+      start_period: 10s
