@@ -37,6 +37,8 @@ Sistema web de registro de visitantes a eventos del centro cultural.
 
 1. El visitante se registra en línea (`POST`).
 2. El personal de recepción consulta la lista de confirmados (`GET`), de forma cercana a tiempo real (recarga de tabla desde el frontend).
+3. El personal puede corregir un registro (`PUT /api/visitantes/{id}`).
+4. El personal puede eliminar un registro (`DELETE /api/visitantes/{id}`).
 
 ## Stack tecnológico fijado
 
@@ -125,10 +127,12 @@ Acordado como contrato estable entre capas. Cambios requieren aviso al equipo y 
 |--------|--------------|-------------|
 | `POST` | `/api/visitantes` | Crear registro |
 | `GET` | `/api/visitantes` | Listar registros |
+| `PUT` | `/api/visitantes/{id}` | Actualizar registro |
+| `DELETE` | `/api/visitantes/{id}` | Eliminar registro |
 
 El frontend **debe** llamar a rutas relativas `/api/visitantes` (sin IPs ni hosts fijos en el JS).
 
-### JSON de ejemplo (cuerpo POST / elementos del GET)
+### JSON de ejemplo (cuerpo POST / PUT / elementos del GET)
 
 ```json
 {
@@ -139,6 +143,7 @@ El frontend **debe** llamar a rutas relativas `/api/visitantes` (sin IPs ni host
 ```
 
 Respuesta GET sugerida: arreglo JSON de objetos con al menos esos campos más `id` y, si aplica, `creado_en`.
+Respuesta PUT: el objeto actualizado. Respuesta DELETE: `204 No Content` (o `404` si el `id` no existe).
 
 ### Esquema SQL mínimo esperado (`database/schema.sql`)
 
@@ -167,9 +172,9 @@ CREATE TABLE visitantes (
 
 | Módulo / funcionalidad | Estado | Dueño |
 |------------------------|--------|-------|
-| Formulario + tabla dinámica | Pendiente | Frontend |
-| Fetch POST/GET `/api/visitantes` | Pendiente | Frontend |
-| API REST FastAPI | Pendiente | Backend |
+| Formulario + tabla dinámica (CRUD) | Completado | Frontend |
+| Fetch POST/GET/PUT/DELETE `/api/visitantes` | Completado | Frontend |
+| API REST FastAPI (CRUD) | Completado | Backend |
 | Variables de entorno DB en backend | Pendiente | Backend |
 | PostgreSQL en Compose | Pendiente | DBA |
 | Volumen EBS / persistencia | Pendiente | DBA |

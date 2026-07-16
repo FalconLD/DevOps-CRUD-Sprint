@@ -41,6 +41,8 @@ docker-compose.yml      # Compartido por BLOQUES (ver comentarios en el archivo)
 
 - `POST /api/visitantes` — registrar visitante
 - `GET /api/visitantes` — listar confirmados
+- `PUT /api/visitantes/{id}` — actualizar visitante
+- `DELETE /api/visitantes/{id}` — eliminar visitante
 
 El frontend debe usar rutas relativas `/api/visitantes` (sin IPs fijas).
 
