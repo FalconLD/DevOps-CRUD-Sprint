@@ -27,7 +27,10 @@
             <option value="Prensa">Prensa</option>
           </select>
 
-          <button type="submit">Registrar visitante</button>
+          <div class="form-actions">
+            <button type="submit">Registrar visitante</button>
+            <button id="cancel-edit-btn" type="button" class="btn-secondary" hidden>Cancelar edición</button>
+          </div>
         </form>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -47,11 +50,12 @@
                 <th>Correo</th>
                 <th>Categoría</th>
                 <th>Creado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody id="visitors-table-body">
               <tr>
-                <td colspan="5" class="empty">Cargando visitantes...</td>
+                <td colspan="6" class="empty">Cargando visitantes...</td>
               </tr>
             </tbody>
           </table>
