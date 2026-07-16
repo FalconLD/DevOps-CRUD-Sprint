@@ -1,0 +1,109 @@
+# Nombre del proyecto (Compose)
+name: devops-crud-sprint
+
+# ---------------------------------------------------------------------------
+# SKELETON — Dueño: DevOps Architect (feature/devops)
+# No renombrar servicios ni la red sin avisar al equipo.
+# Cada rol completa ÚNICAMENTE su bloque marcado abajo.
+# ---------------------------------------------------------------------------
+
+networks:
+  app_net:
+    driver: bridge
+
+services:
+
+  # =========================================================================
+  # OWNER: DevOps Architect — feature/devops
+  # Perímetro público: único puerto expuesto al host = 80
+  # =========================================================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: cci-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app_net
+    restart: unless-stopped
+
+  # =========================================================================
+  # OWNER: Frontend Engineer — feature/frontend
+  # Completar: build/Dockerfile, imagen y healthcheck si aplica.
+  # El contenedor debe escuchar en el puerto 80 (interno).
+  # NO publicar ports al host (Nginx es el perímetro).
+  # =========================================================================
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cci-frontend
+    # ports:  # NO exponer al host en producción
+    expose:
+      - "80"
+    networks:
+      - app_net
+    restart: unless-stopped
+
+  # =========================================================================
+  # OWNER: Backend Developer — feature/backend
+  # Completar: build/Dockerfile, env_file, healthcheck.
+  # FastAPI debe escuchar en 0.0.0.0:8000
+  # NO publicar ports al host (acceso solo vía Nginx /api/).
+  # =========================================================================
+  backend:
+    build:
+      context: ./backend
+    container_name: cci-backend
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-visitantes}
+      POSTGRES_USER: ${POSTGRES_USER:-cci_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cambiar_esta_clave_segura}
+    # ports:  # NO exponer al host en producción
+    expose:
+      - "8000"
+    depends_on:
+      - db
+    networks:
+      - app_net
+    restart: unless-stopped
+
+  # =========================================================================
+  # OWNER: DBA / SRE — feature/database
+  # Completar: imagen postgres, volumes de datos (EBS), mount de schema.sql.
+  # PROHIBIDO publicar "5432:5432" (hardening).
+  # =========================================================================
+  db:
+    image: postgres:16-alpine
+    container_name: cci-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-visitantes}
+      POSTGRES_USER: ${POSTGRES_USER:-cci_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cambiar_esta_clave_segura}
+    # ports:  # NUNCA publicar 5432 al host / Internet
+    expose:
+      - "5432"
+    volumes:
+      # DBA: ajustar path EBS en AWS (ej. /data/postgres) y montar schema.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks:
+      - app_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+# ---------------------------------------------------------------------------
+# OWNER: DBA / SRE — volúmenes de persistencia
+# En AWS, preferir bind mount a disco EBS si el enunciado lo exige.
+# ---------------------------------------------------------------------------
+volumes:
+  postgres_data:

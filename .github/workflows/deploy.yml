@@ -1,0 +1,58 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar sintaxis de docker-compose
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+          echo "docker compose config OK"
+
+      - name: Preparar clave SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' \
+            "Host deploy-target" \
+            "  HostName ${{ secrets.SERVER_IP }}" \
+            "  User ${{ secrets.SERVER_USER }}" \
+            "  IdentityFile ~/.ssh/deploy_key" \
+            "  StrictHostKeyChecking no" \
+            > ~/.ssh/config
+
+      - name: Desplegar por SSH en EC2
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          REMOTE_PATH="${DEPLOY_PATH:-/opt/devops-crud-sprint}"
+          ssh deploy-target "mkdir -p '$REMOTE_PATH'"
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.env' \
+            --exclude 'Documentacion' \
+            ./ "deploy-target:$REMOTE_PATH/"
+          ssh deploy-target "set -e
+            cd '$REMOTE_PATH'
+            if [ ! -f .env ]; then
+              echo 'ERROR: falta .env en el servidor. Créalo a partir de .env.example'
+              exit 1
+            fi
+            docker compose pull || true
+            docker compose up -d --build
+            docker compose ps
+          "

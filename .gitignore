@@ -1,0 +1,29 @@
+# Entorno y secretos
+.env
+.env.local
+*.pem
+*.key
+id_rsa*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node (si el frontend lo usara)
+node_modules/
+dist/
+build/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Docker / datos locales
+postgres_data/
+*.log
