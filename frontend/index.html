@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro de Visitantes</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Registro de Visitantes</h1>
+        <p class="subtitle">Complete los datos del visitante y revise la lista confirmada.</p>
+
+        <form id="visitor-form" novalidate>
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" type="text" required />
+
+          <label for="correo">Correo</label>
+          <input id="correo" name="correo" type="email" required />
+
+          <label for="categoria">Categoría de entrada</label>
+          <select id="categoria" name="categoria" required>
+            <option value="">Seleccione una opción</option>
+            <option value="General">General</option>
+            <option value="VIP">VIP</option>
+            <option value="Prensa">Prensa</option>
+          </select>
+
+          <button type="submit">Registrar visitante</button>
+        </form>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+      </section>
+
+      <section class="card">
+        <div class="table-header">
+          <h2>Visitantes confirmados</h2>
+          <button id="refresh-btn" type="button">Recargar</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Categoría</th>
+                <th>Creado</th>
+              </tr>
+            </thead>
+            <tbody id="visitors-table-body">
+              <tr>
+                <td colspan="5" class="empty">Cargando visitantes...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/app.js" defer></script>
+  </body>
+</html>
